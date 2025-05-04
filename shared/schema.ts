@@ -1,6 +1,7 @@
-import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp, primaryKey, foreignKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User schema (keeping from original)
 export const users = pgTable("users", {
@@ -29,6 +30,10 @@ export const words = pgTable("words", {
   audioUrl: text("audio_url"), // Optional audio URL
 });
 
+export const wordsRelations = relations(words, ({ many }) => ({
+  dailyWords: many(dailyWords),
+}));
+
 export const insertWordSchema = createInsertSchema(words).omit({
   id: true,
 });
@@ -36,10 +41,17 @@ export const insertWordSchema = createInsertSchema(words).omit({
 // Daily words schema to track which word was featured on which date
 export const dailyWords = pgTable("daily_words", {
   id: serial("id").primaryKey(),
-  wordId: integer("word_id").notNull(),
+  wordId: integer("word_id").notNull().references(() => words.id),
   date: date("date").notNull().unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const dailyWordsRelations = relations(dailyWords, ({ one }) => ({
+  word: one(words, {
+    fields: [dailyWords.wordId],
+    references: [words.id],
+  }),
+}));
 
 export const insertDailyWordSchema = createInsertSchema(dailyWords).omit({
   id: true,
