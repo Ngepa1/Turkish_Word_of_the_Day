@@ -2,18 +2,12 @@ import {
   users, 
   words, 
   dailyWords,
-  stories,
-  storyWords,
   type User, 
   type InsertUser,
   type Word,
   type InsertWord,
   type DailyWord,
-  type InsertDailyWord,
-  type Story,
-  type InsertStory,
-  type StoryWord,
-  type InsertStoryWord
+  type InsertDailyWord
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, desc, asc, sql } from "drizzle-orm";
@@ -35,16 +29,6 @@ export interface IStorage {
   getDailyWord(date: Date): Promise<{ dailyWord: DailyWord, word: Word } | undefined>;
   getRecentDailyWords(limit: number): Promise<{ dailyWord: DailyWord, word: Word }[]>;
   createDailyWord(dailyWord: InsertDailyWord): Promise<DailyWord>;
-
-  // Story methods
-  getStory(id: number): Promise<Story | undefined>;
-  getAllStories(): Promise<Story[]>;
-  getStoriesByDifficulty(level: string): Promise<Story[]>;
-  createStory(story: InsertStory): Promise<Story>;
-  
-  // Story-Word relations methods
-  getStoryWords(storyId: number): Promise<{ storyWord: StoryWord, word: Word }[]>;
-  addWordToStory(storyWord: InsertStoryWord): Promise<StoryWord>;
 
   // New method for database implementation
   seedInitialData(): Promise<void>;
@@ -145,53 +129,7 @@ export class DatabaseStorage implements IStorage {
     return dailyWord;
   }
 
-  // Story methods
-  async getStory(id: number): Promise<Story | undefined> {
-    const [story] = await db.select().from(stories).where(eq(stories.id, id));
-    return story;
-  }
 
-  async getAllStories(): Promise<Story[]> {
-    return await db.select().from(stories);
-  }
-
-  async getStoriesByDifficulty(level: string): Promise<Story[]> {
-    return await db.select().from(stories).where(eq(stories.difficultyLevel, level));
-  }
-
-  async createStory(insertStory: InsertStory): Promise<Story> {
-    const [story] = await db.insert(stories).values(insertStory).returning();
-    return story;
-  }
-
-  // Story-Word relations methods
-  async getStoryWords(storyId: number): Promise<{ storyWord: StoryWord, word: Word }[]> {
-    const storyWordsResult = await db.select()
-      .from(storyWords)
-      .where(eq(storyWords.storyId, storyId));
-
-    const result: { storyWord: StoryWord, word: Word }[] = [];
-    
-    for (const sw of storyWordsResult) {
-      const [word] = await db.select()
-        .from(words)
-        .where(eq(words.id, sw.wordId));
-      
-      if (word) {
-        result.push({ storyWord: sw, word });
-      }
-    }
-    
-    return result;
-  }
-
-  async addWordToStory(insertStoryWord: InsertStoryWord): Promise<StoryWord> {
-    const [storyWord] = await db.insert(storyWords)
-      .values(insertStoryWord)
-      .returning();
-    
-    return storyWord;
-  }
 
   // Seed initial data if the database is empty
   async seedInitialData(): Promise<void> {
@@ -347,50 +285,7 @@ export class DatabaseStorage implements IStorage {
         });
       }
       
-      // Check if we have stories
-      const existingStories = await this.getAllStories();
-      
-      if (existingStories.length === 0) {
-        console.log('Seeding initial stories...');
-        // Seed initial stories
-        const initialStories: InsertStory[] = [
-          {
-            title: "Kahvaltı",
-            titleEnglish: "Breakfast",
-            difficultyLevel: "beginner",
-            contentTurkish: "Ali her sabah erken kalkar. Saat yedide kahvaltı yapar. Kahvaltıda çay içer ve ekmek yer. Bazen peynir ve zeytin de yer. Kahvaltıdan sonra işe gider. Ali kahvaltıyı çok sever.",
-            contentEnglish: "Ali wakes up early every morning. He has breakfast at seven o'clock. At breakfast, he drinks tea and eats bread. Sometimes he also eats cheese and olives. After breakfast, he goes to work. Ali loves breakfast very much.",
-            vocabularyWords: ["kahvaltı", "sabah", "erken", "çay", "ekmek", "peynir", "zeytin"]
-          },
-          {
-            title: "Pazar Günü",
-            titleEnglish: "Sunday",
-            difficultyLevel: "beginner",
-            contentTurkish: "Bugün pazar. Ayşe pazar günlerini çok sever. Çünkü okul yok. Ayşe geç uyanır ve ailesine kahvaltı hazırlar. Öğleden sonra arkadaşlarıyla parkta buluşur. Hep beraber dondurma yerler ve oyun oynarlar. Akşam ise ailesiyle film izler. Ayşe için pazar günleri çok güzel geçer.",
-            contentEnglish: "Today is Sunday. Ayşe loves Sundays very much because there is no school. Ayşe wakes up late and prepares breakfast for her family. In the afternoon, she meets her friends at the park. They all eat ice cream together and play games. In the evening, she watches a movie with her family. For Ayşe, Sundays are very enjoyable.",
-            vocabularyWords: ["pazar", "günü", "okul", "aile", "kahvaltı", "arkadaş", "park", "dondurma", "film"]
-          }
-        ];
-        
-        // Insert the stories one by one
-        for (const story of initialStories) {
-          await this.createStory(story);
-        }
-        
-        // Link some vocabulary words to stories
-        const allStories = await this.getAllStories();
-        
-        if (allStories.length > 0) {
-          const vocabWords = await this.searchWords("kitap");
-          
-          if (vocabWords.length > 0) {
-            await this.addWordToStory({
-              storyId: allStories[0].id,
-              wordId: vocabWords[0].id
-            });
-          }
-        }
-      }
+
       
       console.log('Database seeding complete!');
     }
