@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertWordSchema, insertDailyWordSchema } from "@shared/schema";
+import { insertWordSchema, insertDailyWordSchema, insertStorySchema, insertStoryWordsSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
@@ -27,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create a new daily word
         const newDailyWord = await storage.createDailyWord({
           wordId: randomWord.id,
-          date: today
+          date: today.toISOString().split('T')[0]
         });
         
         return res.json({ 
@@ -128,7 +128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if there's already a word for this date
-      const existingDailyWord = await storage.getDailyWord(validatedData.date);
+      const date = new Date(validatedData.date);
+      const existingDailyWord = await storage.getDailyWord(date);
       if (existingDailyWord) {
         return res.status(409).json({ message: "A word is already set for this date" });
       }
@@ -143,6 +144,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.error("Error creating daily word:", error);
       res.status(500).json({ message: "Failed to create daily word" });
+    }
+  });
+
+  // Story routes
+  app.get("/api/stories", async (req: Request, res: Response) => {
+    try {
+      // Get stories, optionally filtered by difficulty level
+      const difficulty = req.query.difficulty as string;
+      
+      let stories;
+      if (difficulty) {
+        stories = await storage.getStoriesByDifficulty(difficulty);
+      } else {
+        stories = await storage.getAllStories();
+      }
+      
+      res.json(stories);
+    } catch (error) {
+      console.error("Error getting stories:", error);
+      res.status(500).json({ message: "Failed to get stories" });
+    }
+  });
+
+  app.get("/api/story/:id", async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid story ID" });
+      }
+      
+      const story = await storage.getStory(id);
+      
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      // Get the vocabulary words for this story
+      const storyWords = await storage.getStoryWords(id);
+      
+      res.json({ story, vocabulary: storyWords });
+    } catch (error) {
+      console.error("Error getting story:", error);
+      res.status(500).json({ message: "Failed to get story" });
+    }
+  });
+
+  app.post("/api/story", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertStorySchema.parse(req.body);
+      const story = await storage.createStory(validatedData);
+      res.status(201).json(story);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      
+      console.error("Error creating story:", error);
+      res.status(500).json({ message: "Failed to create story" });
+    }
+  });
+
+  app.post("/api/story/word", async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertStoryWordsSchema.parse(req.body);
+      
+      // Check if the story exists
+      const story = await storage.getStory(validatedData.storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      // Check if the word exists
+      const word = await storage.getWord(validatedData.wordId);
+      if (!word) {
+        return res.status(404).json({ message: "Word not found" });
+      }
+      
+      const storyWord = await storage.addWordToStory(validatedData);
+      res.status(201).json({ storyWord, word });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ message: validationError.message });
+      }
+      
+      console.error("Error adding word to story:", error);
+      res.status(500).json({ message: "Failed to add word to story" });
     }
   });
 
