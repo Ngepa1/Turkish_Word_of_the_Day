@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 0 76% 50%;  /* Turkish Red: #E81C23 */
+  --primary-foreground: 211 100% 99%;
+  --secondary: 199 100% 44%;  /* Turkish Blue: #00A9E0 */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 43 90% 58%;  /* Turkish Gold: #F5B335 */
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  --chart-1: 0 76% 50%;
+  --chart-2: 199 100% 44%;
+  --chart-3: 43 90% 58%;
+  --chart-4: 120 100% 25%;
+  --chart-5: 262 83% 58%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 20 14.3% 4.1%;
+  --sidebar-border: 20 5.9% 90%;
+  --sidebar-primary: 0 76% 50%;
+  --sidebar-primary-foreground: 211 100% 99%;
+  --sidebar-accent: 43 90% 58%;
+  --sidebar-accent-foreground: 24 9.8% 10%;
+  --sidebar-ring: 20 14.3% 4.1%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 0 76% 50%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 199 100% 44%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 43 90% 58%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --sidebar-background: 240 10% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-primary: 0 76% 50%;
+  --sidebar-primary-foreground: 211 100% 99%;
+  --sidebar-accent: 43 90% 58%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-[#f8f9fa] text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins;
+  }
+}
+
+@layer utilities {
+  .turkish-pattern {
+    background-color: #f8f9fa;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e81c23' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .font-poppins {
+    font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .font-nunito {
+    font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  }
+}
