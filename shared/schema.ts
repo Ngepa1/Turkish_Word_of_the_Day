@@ -58,6 +58,50 @@ export const insertDailyWordSchema = createInsertSchema(dailyWords).omit({
   createdAt: true,
 });
 
+// Stories schema for short Turkish reading practice
+export const stories = pgTable("stories", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  titleEnglish: text("title_english").notNull(),
+  difficultyLevel: text("difficulty_level").notNull(), // beginner, intermediate, advanced
+  contentTurkish: text("content_turkish").notNull(),
+  contentEnglish: text("content_english").notNull(),
+  vocabularyWords: text("vocabulary_words").array(), // Array of key Turkish words used in the story
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertStorySchema = createInsertSchema(stories).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Story-Word relations for vocabulary highlighting
+export const storyWords = pgTable("story_words", {
+  id: serial("id").primaryKey(),
+  storyId: integer("story_id").notNull().references(() => stories.id),
+  wordId: integer("word_id").notNull().references(() => words.id),
+});
+
+export const storyWordsRelations = relations(storyWords, ({ one }) => ({
+  story: one(stories, {
+    fields: [storyWords.storyId],
+    references: [stories.id],
+  }),
+  word: one(words, {
+    fields: [storyWords.wordId],
+    references: [words.id],
+  }),
+}));
+
+export const insertStoryWordsSchema = createInsertSchema(storyWords).omit({
+  id: true,
+});
+
+// Relations
+export const storiesRelations = relations(stories, ({ many }) => ({
+  storyWords: many(storyWords),
+}));
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -67,3 +111,9 @@ export type InsertWord = z.infer<typeof insertWordSchema>;
 
 export type DailyWord = typeof dailyWords.$inferSelect;
 export type InsertDailyWord = z.infer<typeof insertDailyWordSchema>;
+
+export type Story = typeof stories.$inferSelect;
+export type InsertStory = z.infer<typeof insertStorySchema>;
+
+export type StoryWord = typeof storyWords.$inferSelect;
+export type InsertStoryWord = z.infer<typeof insertStoryWordsSchema>;
