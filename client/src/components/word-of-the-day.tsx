@@ -4,13 +4,34 @@ import { Share2, Volume2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import type { WordOfTheDay as WordOfTheDayType } from "@/lib/types";
+import { getTodayWord, storeTodayWord } from "@/lib/offlineStorage";
 
 export default function WordOfTheDay() {
   const { toast } = useToast();
+  const isOnline = useOnlineStatus();
 
   const { data, isLoading, error } = useQuery<WordOfTheDayType>({
     queryKey: ["/api/word/today"],
+    // Store data in localStorage when online
+    onSuccess: (data) => {
+      if (data) {
+        storeTodayWord(data);
+      }
+    },
+    // Use cached data when offline
+    initialData: () => {
+      if (!isOnline) {
+        const cachedWord = getTodayWord();
+        if (cachedWord) {
+          return cachedWord;
+        }
+      }
+      return undefined;
+    },
+    // Disable network requests when offline
+    enabled: isOnline,
   });
 
   const handlePlayAudio = () => {
@@ -52,11 +73,15 @@ export default function WordOfTheDay() {
     }
   };
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-xl font-bold text-red-500">Error loading today's word</h2>
-        <p>Please try again later.</p>
+        {!isOnline ? (
+          <p>You are currently offline. Check your internet connection and try again.</p>
+        ) : (
+          <p>Please try again later.</p>
+        )}
       </div>
     );
   }

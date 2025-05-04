@@ -8,6 +8,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileMenu from "@/components/layout/mobile-menu";
 import MobileNavbar from "@/components/layout/mobile-navbar";
+import OfflineIndicator from "@/components/offline-indicator";
 import Home from "@/pages/home";
 import History from "@/pages/history";
 import Search from "@/pages/search";
@@ -47,6 +48,7 @@ function App() {
           
           <Footer />
           <MobileNavbar />
+          <OfflineIndicator />
           <Toaster />
         </div>
       </TooltipProvider>
