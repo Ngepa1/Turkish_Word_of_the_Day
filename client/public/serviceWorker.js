@@ -3,11 +3,15 @@ const CACHE_NAME = 'turkish-wordofday-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/offline.html',
+  '/manifest.json',
+  '/logo.svg',
+  '/favicon.ico',
+  '/serviceWorkerRegistration.js',
   '/assets/index.css',
   '/assets/index.js',
   '/api/word/today',
-  '/api/word/history',
-  // Add more critical assets to cache
+  '/api/word/history'
 ];
 
 // Install a service worker
@@ -15,9 +19,10 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('Service Worker: Caching files');
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -30,7 +35,11 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
-        return fetch(event.request)
+
+        // Clone the request
+        const fetchRequest = event.request.clone();
+
+        return fetch(fetchRequest)
           .then(response => {
             // Check if we received a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
@@ -51,6 +60,20 @@ self.addEventListener('fetch', event => {
               });
 
             return response;
+          })
+          .catch(error => {
+            console.log('Service Worker: Fetch failed; returning offline page instead.', error);
+            
+            // Check if this is a navigation request
+            if (event.request.mode === 'navigate') {
+              return caches.match('/offline.html');
+            }
+            
+            // If both the fetch and offline fallback fail, return a simple error response
+            return new Response('Network error occurred', {
+              status: 408,
+              headers: { 'Content-Type': 'text/plain' }
+            });
           });
       })
   );
@@ -64,10 +87,21 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Service Worker: Clearing old cache');
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      console.log('Service Worker: Activated');
+      return self.clients.claim();
     })
   );
+});
+
+// Listen for messages from the client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
