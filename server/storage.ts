@@ -279,7 +279,7 @@ export class DatabaseStorage implements IStorage {
         
         await this.createDailyWord({
           wordId,
-          date
+          date: date.toISOString().split('T')[0]
         });
       }
       
