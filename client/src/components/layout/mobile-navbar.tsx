@@ -21,25 +21,25 @@ export default function MobileNavbar() {
         </Link>
         <Link href="/history">
           <a className={`flex flex-col items-center py-2 px-3 ${location === '/history' ? 'text-[#00A9E0]' : 'text-gray-600'}`}>
-            <Clock className="h-6 w-6" />
+            <Clock className="h-5 w-5" />
             <span className="text-xs mt-1">History</span>
           </a>
         </Link>
         <Link href="/search">
           <a className={`flex flex-col items-center py-2 px-3 ${location === '/search' ? 'text-[#00A9E0]' : 'text-gray-600'}`}>
-            <Search className="h-6 w-6" />
+            <Search className="h-5 w-5" />
             <span className="text-xs mt-1">Search</span>
           </a>
         </Link>
         <Link href="/practice">
           <a className={`flex flex-col items-center py-2 px-3 ${location === '/practice' ? 'text-[#00A9E0]' : 'text-gray-600'}`}>
-            <Brain className="h-6 w-6" />
+            <Brain className="h-5 w-5" />
             <span className="text-xs mt-1">Practice</span>
           </a>
         </Link>
         <Link href="/about">
           <a className={`flex flex-col items-center py-2 px-3 ${location === '/about' ? 'text-[#00A9E0]' : 'text-gray-600'}`}>
-            <Info className="h-6 w-6" />
+            <Info className="h-5 w-5" />
             <span className="text-xs mt-1">About</span>
           </a>
         </Link>
