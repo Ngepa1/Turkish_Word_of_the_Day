@@ -2,6 +2,7 @@ import WordOfTheDay from "@/components/word-of-the-day";
 import SearchBox from "@/components/search-box";
 import WordHistory from "@/components/word-history";
 import LearningTips from "@/components/learning-tips";
+import LearningProgress from "@/components/learning-progress";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       
       {/* Sidebar */}
       <aside className="w-full md:w-1/3">
+        <LearningProgress />
         <WordHistory limit={5} />
         <LearningTips />
       </aside>
