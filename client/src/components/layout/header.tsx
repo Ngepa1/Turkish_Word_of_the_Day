@@ -51,6 +51,11 @@ export default function Header({ toggleMobileMenu }: HeaderProps) {
               Search
             </a>
           </Link>
+          <Link href="/practice">
+            <a className={`${location === '/practice' ? 'text-[#00A9E0]' : 'text-dark'} hover:text-[#E81C23] transition-colors duration-200 font-medium`}>
+              Practice
+            </a>
+          </Link>
           <Link href="/about">
             <a className={`${location === '/about' ? 'text-[#00A9E0]' : 'text-dark'} hover:text-[#E81C23] transition-colors duration-200 font-medium`}>
               About

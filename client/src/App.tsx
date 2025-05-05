@@ -13,6 +13,7 @@ import Home from "@/pages/home";
 import History from "@/pages/history";
 import Search from "@/pages/search";
 import About from "@/pages/about";
+import Practice from "@/pages/practice";
 import { useState } from "react";
 
 function Router() {
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/history" component={History} />
       <Route path="/search" component={Search} />
+      <Route path="/practice" component={Practice} />
       <Route path="/about" component={About} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

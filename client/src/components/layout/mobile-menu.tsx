@@ -30,6 +30,11 @@ export default function MobileMenu({ isOpen }: MobileMenuProps) {
               Search
             </a>
           </Link>
+          <Link href="/practice">
+            <a className={`${location === '/practice' ? 'text-[#00A9E0]' : 'text-dark'} hover:text-[#E81C23] py-2 border-b border-gray-light transition-colors duration-200 font-medium`}>
+              Practice
+            </a>
+          </Link>
           <Link href="/about">
             <a className={`${location === '/about' ? 'text-[#00A9E0]' : 'text-dark'} hover:text-[#E81C23] py-2 transition-colors duration-200 font-medium`}>
               About
